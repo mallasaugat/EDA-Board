@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 
 import { ReadCSV } from './components/ReadCSV';
-import Paginate from './components/Paginate';
 
 import './App.css'
 

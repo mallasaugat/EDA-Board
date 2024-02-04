@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Papa from "papaparse";
+import ReactPaginate from 'react-paginate';
 
 
 
@@ -14,7 +15,9 @@ export class ReadCSV extends Component{
             tableRows: [],
             values: [],
 
+            currentPage: 0,
             dataPerPage: 10,
+
         };
 
         this.changeHandler = this.changeHandler.bind(this);  // Bind the changeHandler method
@@ -50,8 +53,20 @@ export class ReadCSV extends Component{
         });
       };
 
+    handlePageClick = ({selected}) => {
+        this.setState({
+            currentPage: selected,
+        });
+    }
 
     render(){
+
+        const { tableRows, values, currentPage, dataPerPage } = this.state;
+        const startIndex = currentPage * dataPerPage;
+        const endIndex = startIndex + dataPerPage;
+        
+        const currentValues = values.slice(startIndex, endIndex);
+
         return(
             <>
                 {/* File Uploader */}
@@ -70,8 +85,10 @@ export class ReadCSV extends Component{
                             }
                         </tr>
                     </thead>
+
                     <tbody>
-                        {
+
+                        {/* {
                             this.state.values.map((value, index) => {
                             return (
                                 <tr key={index}>
@@ -80,9 +97,36 @@ export class ReadCSV extends Component{
                                     })}
                                 </tr>
                             );
-                        })}
+                        })} */}
+
+                        {
+                            currentValues.map((value, index) => {
+                                return(
+                                    <tr key={index}>
+                                        {value.map((val,i) => {
+                                            return <td key={i}>{val}</td>
+                                        })}
+                                    </tr>
+                                );
+                            })
+                        }
                     </tbody>
                 </table>
+
+                 {/* Render the ReactPaginate component */}
+                 <ReactPaginate
+                    previousLabel={'previous'}
+                    nextLabel={'next'}
+                    breakLabel={'...'}
+                    breakClassName={'break-me'}
+                    pageCount={Math.ceil(values.length / dataPerPage)}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={this.handlePageClick}
+                    containerClassName={'pagination'}
+                    subContainerClassName={'pages pagination'}
+                    activeClassName={'active'}
+                />
             </>
         );
     }
