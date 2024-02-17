@@ -3,9 +3,11 @@ import React, { Component } from "react";
 import Papa from "papaparse";
 import ReactPaginate from 'react-paginate';
 
+import * as d3 from 'd3';
 import { BarChart } from './BarChart';
 import { HistogramChart } from './HistogramChart';
-import * as d3 from 'd3';
+import { PieChart } from './PieChart';
+import { HeatMap } from './HeatMap';
 
 
 
@@ -20,6 +22,8 @@ export class ReadCSV extends Component{
             tableRows: [],
             values: [],
 
+            count: [],
+
             currentPage: 0,
             dataPerPage: 10,
 
@@ -30,41 +34,17 @@ export class ReadCSV extends Component{
             histogramFeatureIndex: 0,
             showHistogram: false,
 
-            heatmapData: [],
-            
+            numericalStats: {},
+            categoricalFeatures: {},
+
+            correlationMatrix: [],
+
         };
 
         this.changeHandler = this.changeHandler.bind(this);  // Bind the changeHandler method
 
     }
 
-    renderHeatmap = () => {
-        const { tableRows, heatmapData } = this.state;
-
-        const svg = d3.select('#heatmap-container')
-            .append('svg')
-            .attr('width', '100%')
-            .attr('height', '100%');
-
-        const colorScale = d3.scaleSequential(d3.interpolateBlues)
-            .domain([d3.min(heatmapData), d3.max(heatmapData)]);
-
-        svg.selectAll('.heatmap-row')
-            .data(heatmapData)
-            .enter()
-            .append('g')
-            .attr('class', 'heatmap-row')
-            .selectAll('.heatmap-cell')
-            .data(d => d)
-            .enter()
-            .append('rect')
-            .attr('class', 'heatmap-cell')
-            .attr('x', (d, i) => i * 50) // Adjust spacing based on your needs
-            .attr('y', (d, i) => i * 20) // Adjust spacing based on your needs
-            .attr('width', 50) // Adjust cell width based on your needs
-            .attr('height', 20) // Adjust cell height based on your needs
-            .attr('fill', d => colorScale(d));
-    };
 
     changeHandler = (event)=>{
         // console.log(event.target.files[0])
@@ -80,21 +60,61 @@ export class ReadCSV extends Component{
             const rowsArray = [];
             const valuesArray = [];
             const missingValues = [];
+            const numericalFeatures = {};
+            const categoricalFeatures = {};
     
             // Iterating data to get column name and their values
             results.data.map((d) => {
+                const rowValues = Object.values(d);
                 rowsArray.push(Object.keys(d));
-                valuesArray.push(Object.values(d));
+                valuesArray.push(rowValues);
 
-                // Check for null values
-                const rowsValues = Object.values(d);
-                rowsValues.map((val, index) =>{
-                    if(val===null || val== undefined || val===''){
-                        const featureName = rowsArray[0][index];
-                        missingValues.push({feature: featureName, value: val});
+                rowValues.forEach((val, index) => {
+                    const featureName = rowsArray[0][index];
+                    if (val === null || val === undefined || val === '') {
+                        missingValues.push({ feature: featureName, value: val });
+                    } else {
+                        if (!isNaN(val)) {
+                            if (!numericalFeatures[featureName]) {
+                                numericalFeatures[featureName] = [];
+                            }
+                            numericalFeatures[featureName].push(parseFloat(val));
+                        } else {
+                            if (!categoricalFeatures[featureName]) {
+                                categoricalFeatures[featureName] = new Set();
+                            }
+                            categoricalFeatures[featureName].add(val);
+                        }
                     }
                 });
             });
+
+            const numericalStats = {};
+            Object.entries(numericalFeatures).forEach(([feature, values]) => {
+                const count = values.length;
+                const mean = d3.mean(values);
+                const std = d3.deviation(values);
+                const min = d3.min(values);
+                const max = d3.max(values);
+                const sortedValues = values.sort((a, b) => a - b);
+                const median = d3.median(sortedValues);
+                const q1 = sortedValues[Math.floor((sortedValues.length - 1) / 4)];
+                const q3 = sortedValues[Math.ceil((sortedValues.length - 1) * 3 / 4)];
+
+                numericalStats[feature] = {
+                    count,
+                    mean,
+                    std,
+                    min,
+                    median,
+                    firstQuartile: q1,
+                    thirdQuartile: q3,
+                    max,
+                };
+            });
+
+            const correlationMatrix = this.calculateCorrelationMatrix(numericalFeatures);
+            
 
             // Calculating missing value percentage
             const totalRows = valuesArray.length;
@@ -106,9 +126,8 @@ export class ReadCSV extends Component{
             Object.keys(missingValuesCount).map((feature) => {
                 missingValuesPercentage[feature] = (missingValuesCount[feature] / totalRows) * 100;
             });
+
             
-            const heatmapFeatureIndex = 0;
-            const heatmapData = [valuesArray.map(row => parseFloat(row[heatmapFeatureIndex]))];
             
             this.setState({
                 parsedData: results.data,
@@ -116,15 +135,56 @@ export class ReadCSV extends Component{
                 values: valuesArray,
                 missingValues: missingValues,
                 missingValuesPercentage: missingValuesPercentage,
-                heatmapData: heatmapData,
+                numericalStats: numericalStats,
+                categoricalFeatures: categoricalFeatures,
+                correlationMatrix: correlationMatrix,
             });
 
-            this.renderHeatmap(); //Call the heatmap rendering after setting state
 
           }.bind(this),
 
         });
       };
+    
+
+    // Function to calculate correlation matrix
+    calculateCorrelationMatrix = (numericalFeatures) => {
+        const features = Object.keys(numericalFeatures);
+        const correlationMatrix = [];
+
+        for (let i = 0; i < features.length; i++) {
+            const row = [];
+            for (let j = 0; j < features.length; j++) {
+                const feature1 = features[i];
+                const feature2 = features[j];
+                const correlation = this.calculateCorrelation(numericalFeatures[feature1], numericalFeatures[feature2]);
+                row.push(correlation);
+            }
+            correlationMatrix.push(row);
+        }
+
+        return correlationMatrix;
+    };
+
+    // Function to calcualte correlation coefficient
+    calculateCorrelation = (values1, values2) => {
+        const n = values1.length;
+        const sumX = d3.sum(values1);
+        const sumY = d3.sum(values2);
+        const sumXSq = d3.sum(values1.map(x => Math.pow(x, 2)));
+        const sumYSq = d3.sum(values2.map(y => Math.pow(y, 2)));
+        const sumXY = d3.sum(values1.map((x, i) => x * values2[i]));
+
+        const numerator = (n * sumXY) - (sumX * sumY);
+        const denominator = Math.sqrt((n * sumXSq - Math.pow(sumX, 2)) * (n * sumYSq - Math.pow(sumY, 2)));
+
+        if (denominator === 0) {
+            return 0; // Correlation is 0 if denominator is 0
+        }
+
+        return numerator / denominator;
+    };
+
 
     
 
@@ -156,10 +216,6 @@ export class ReadCSV extends Component{
         const startIndex = currentPage * dataPerPage;
         const endIndex = startIndex + dataPerPage;
         const currentValues = values.slice(startIndex, endIndex);
-
-        // Manual histogram index
-        //const histogramFeatureIndex = 1; // Index of the feature to visualize
-        //const histogramFeatureIndex = this.state.values.map((row) => row[histogramFeatureIndex]);
 
         
         return(
@@ -217,9 +273,35 @@ export class ReadCSV extends Component{
                 <br/>
                 <br/>
 
+                {/* Data Description */}
+                <div>
+                    <h3>Numerical Feature Descriptions:</h3>
+                    {Object.entries(this.state.numericalStats).map(([feature, stats]) => (
+                        <div key={feature}>
+                            <h4>{feature}</h4>
+                            <ul>
+                                <li>Count: {stats.count}</li>
+                                <li>Mean: {stats.mean}</li>
+                                <li>Standard Deviation: {stats.std}</li>
+                                <li>Minimum: {stats.min}</li>
+                                <li>25th Percentile (First Quartile): {stats.firstQuartile}</li>
+                                <li>Median: {stats.median}</li>
+                                <li>75th Percentile (Third Quartile): {stats.thirdQuartile}</li>
+                                <li>Maximum: {stats.max}</li>
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+                <br/>
+                <br/>
+                {/* <DataDescription tableRows={tableRows} values={values}/> */}
+
                 
                 {/* Bar Chart */}
                 <BarChart missingValuesPercentage={missingValuesPercentage}/>
+                <br/>
+                <br/>
+
 
                 {/* Histogram chart */}
                 <label>
@@ -241,17 +323,47 @@ export class ReadCSV extends Component{
                 )}
 
                 <br/>
+                <br/>   
+
+                {/* Pie Chart */}
+                { this.state.categoricalFeatures && this.state.numericalStats && (
+                        <PieChart 
+                            categoricalFeatures= {this.state.categoricalFeatures}
+                            numericalFeatures = {this.state.numericalStats} 
+                        />
+                    )
+                }
+                <br/>
                 <br/>
 
-                {/* HeatMap */}
-                {this.state.heatmapData.length > 0 && (
-                    <div id="heatmap-container">
-                        {/* Render the heatmap here */}
-                        {this.renderHeatmap()}
-                    </div>
-                )}
+               {/* Correlation Matrix */}
+               {/* <div>
+                    <h3>Correlation Matrix:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                {tableRows.map((feature, index) => (
+                                    <th key={index}>{feature}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {this.state.correlationMatrix.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                    {row.map((correlation, colIndex) => (
+                                        <td key={colIndex}>{correlation.toFixed(2)}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div> */}
 
-              
+                <HeatMap numericalStats = {this.state.numericalStats}  correlationMatrix = {this.state.correlationMatrix} />
+
+                <br/>
+                <br/>
+
 
             </>
             
