@@ -4,13 +4,14 @@ import Papa from "papaparse";
 import ReactPaginate from 'react-paginate';
 
 import * as d3 from 'd3';
+
+import { DataDescription } from "./DataDescription";
 import { BarChart } from './BarChart';
 import { HistogramChart } from './HistogramChart';
 import { PieChart } from './PieChart';
 import { HeatMap } from './HeatMap';
-import { Scatter } from "react-chartjs-2";
-import ScatterPlot from "./ScatterPlot";
 
+import Dropdown from 'react-bootstrap/Dropdown';
 
 
 export class ReadCSV extends Component{
@@ -32,14 +33,12 @@ export class ReadCSV extends Component{
             missingValues: [],
             missingValuesCount: {},
 
-            histogramData: {},
-            histogramFeatureIndex: 0,
-            showHistogram: false,
-
             numericalStats: {},
             categoricalFeatures: {},
 
             correlationMatrix: [],
+
+            selectedOption: null,
 
         };
 
@@ -188,37 +187,51 @@ export class ReadCSV extends Component{
     };
 
 
-    
-
     handlePageClick = ({selected}) => {
         this.setState({
             currentPage: selected,
         });
     };
 
-    handleHistogramIndexChange = (event) => {
-        const newIndex = parseInt(event.target.value, 10);
-        if(!isNaN(newIndex)){
-            this.setState({
-                histogramFeatureIndex: newIndex,
-            });
-        }
+
+    handleDropdownChange = (eventKey) => {
+        this.setState({ selectedOption: eventKey }); // eventKey is the dom attribute
     };
 
-    handleShowHistogram = () => {
-        this.setState({
-            showHistogram: true,
-        });
+    renderVisualization = () => {
+        const { selectedOption, missingValuesPercentage } = this.state;
+
+        switch (selectedOption) {
+            case "Data":
+                return <DataDescription numericalStats={this.state.numericalStats} />;
+            case "Pie":
+                return <PieChart
+                            categoricalFeatures={this.state.categoricalFeatures}
+                            numericalFeatures={this.state.numericalStats}
+                        />;
+            case "Bar":
+                return <BarChart missingValuesPercentage={missingValuesPercentage} />;
+            case "Histogram":
+                
+                return <HistogramChart
+                            values={this.state.values}
+                            tableRows={this.state.tableRows}
+                        />;
+            case "Heat":
+                return <HeatMap numericalStats={this.state.numericalStats} correlationMatrix={this.state.correlationMatrix} />;
+            default:
+                return null;
+        }
     };
    
 
     render(){
 
-        const { tableRows, values, currentPage, dataPerPage, missingValuesPercentage} = this.state;
+        const { tableRows, values, currentPage, dataPerPage} = this.state;
         const startIndex = currentPage * dataPerPage;
         const endIndex = startIndex + dataPerPage;
         const currentValues = values.slice(startIndex, endIndex);
-
+        
         
         return(
             <div className="container mt-5">
@@ -246,7 +259,7 @@ export class ReadCSV extends Component{
                 </table>
 
                 {/* ReactPaginate */}
-                <ReactPaginate
+                {values.length > 0 && (<ReactPaginate
                     previousLabel={'Previous'}
                     nextLabel={'Next'}
                     pageCount={Math.ceil(values.length / dataPerPage)} // Dynamically calculate pageCount
@@ -260,72 +273,33 @@ export class ReadCSV extends Component{
                     nextClassName={'page-item'}
                     previousLinkClassName={'page-link'}
                     nextLinkClassName={'page-link'}
-                />
+                />)
+                }
 
                 
 
-                <p className="mt-3">The total number of features: {tableRows.length} and the total number of rows: {values.length}</p>
+                {values.length > 0 && (<p className="mt-3">The total number of features: {tableRows.length} and the total number of rows: {values.length}</p>)}
 
-                {/* Data Description */}
-                <div>
-                    <h3>Numerical Feature Descriptions:</h3>
-                    {Object.entries(this.state.numericalStats).map(([feature, stats]) => (
-                        <div key={feature}>
-                            <h4>{feature}</h4>
-                            <ul>
-                                <li>Count: {stats.count}</li>
-                                <li>Mean: {stats.mean}</li>
-                                <li>Standard Deviation: {stats.std}</li>
-                                <li>Minimum: {stats.min}</li>
-                                <li>25th Percentile (First Quartile): {stats.firstQuartile}</li>
-                                <li>Median: {stats.median}</li>
-                                <li>75th Percentile (Third Quartile): {stats.thirdQuartile}</li>
-                                <li>Maximum: {stats.max}</li>
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Bar Chart */}
-                <BarChart missingValuesPercentage={missingValuesPercentage} />
-
-                {/* Histogram chart */}
-                <label>
-                    Enter the index for the histogram data:
-                    <input
-                        type="number"
-                        value={this.state.histogramFeatureIndex}
-                        onChange={this.handleHistogramIndexChange}
-                        className="form-control"
-                    />
-                </label>
-
-                <button onClick={this.handleShowHistogram} className="btn btn-primary">Press to show Histogram</button>
-
-                {this.state.showHistogram && (
-                    <HistogramChart
-                        featureData={this.state.values.map((row) => row[this.state.histogramFeatureIndex])}
-                        featureName={this.state.tableRows[this.state.histogramFeatureIndex]}
-                    />
+                {/* Drop Down */}
+                {values.length > 0 && (
+                    <Dropdown onSelect={this.handleDropdownChange}>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            Select Visualization
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item eventKey="Data">Data Description</Dropdown.Item>
+                            <Dropdown.Item eventKey="Pie">Pie Chart</Dropdown.Item>
+                            <Dropdown.Item eventKey="Bar">Count Plot</Dropdown.Item>
+                            <Dropdown.Item eventKey="Histogram">Histogram</Dropdown.Item>
+                            <Dropdown.Item eventKey="Heat">Correlation HeatMap</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 )}
+                <br/>
+                <br/>
+                {this.renderVisualization()}
 
-                {/* Pie Chart */}
-                {this.state.categoricalFeatures && this.state.numericalStats && (
-                    <PieChart
-                        categoricalFeatures={this.state.categoricalFeatures}
-                        numericalFeatures={this.state.numericalStats}
-                    />
-                )}
-
-                {/* Correlation Matrix */}
-                <HeatMap numericalStats={this.state.numericalStats} correlationMatrix={this.state.correlationMatrix} />
-
-                {/* Scatter Plot */}
-                {/* <ScatterPlot
-                    data={values.map(row => ({ x: values[0], y: values[1] }))} // Adjust this according to your data
-                    xLabel={tableRows[0]} // Adjust as needed
-                    yLabel={tableRows[1]} // Adjust as needed
-                /> */}
+                
             </div>
 
             
