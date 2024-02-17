@@ -14,6 +14,7 @@ import { HeatMap } from './HeatMap';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 
+
 export class ReadCSV extends Component{
 
     constructor(props){
@@ -187,11 +188,14 @@ export class ReadCSV extends Component{
     };
 
 
+    
+
     handlePageClick = ({selected}) => {
         this.setState({
             currentPage: selected,
         });
     };
+
 
 
     handleDropdownChange = (eventKey) => {
