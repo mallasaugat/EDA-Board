@@ -8,6 +8,8 @@ import { BarChart } from './BarChart';
 import { HistogramChart } from './HistogramChart';
 import { PieChart } from './PieChart';
 import { HeatMap } from './HeatMap';
+import { Scatter } from "react-chartjs-2";
+import ScatterPlot from "./ScatterPlot";
 
 
 
@@ -219,59 +221,50 @@ export class ReadCSV extends Component{
 
         
         return(
-            <>
+            <div className="container mt-5">
                 {/* File Uploader */}
-                <input type="file" name="file" accept='.csv' className="form-control form-control-sm" id="formFileSm" onChange={this.changeHandler}></input>
-                <br/>
-                <br/>
+                <input type="file" name="file" accept='.csv' className="form-control form-control-sm mb-3" id="formFileSm" onChange={this.changeHandler} />
 
                 {/* Table */}
-                <table>
+                <table className="table">
                     <thead>
                         <tr>
-                            {
-                                this.state.tableRows.map((rows, index) => {
-                                    return <th key={index}>{rows}</th>
-                                })
-                            }
+                            {tableRows.map((rows, index) => (
+                                <th key={index}>{rows}</th>
+                            ))}
                         </tr>
                     </thead>
-
                     <tbody>
-
-
-                        {
-                            currentValues.map((value, index) => {
-                                return(
-                                    <tr key={index}>
-                                        {value.map((val,i) => {
-                                            return <td key={i}>{val}</td>
-                                        })}
-                                    </tr>
-                                );
-                            })
-                        }
+                        {currentValues.map((value, index) => (
+                            <tr key={index}>
+                                {value.map((val, i) => (
+                                    <td key={i}>{val}</td>
+                                ))}
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
 
-                 {/* Render the ReactPaginate component */}
-                 <ReactPaginate
-                    previousLabel={'previous'}
-                    nextLabel={'next'}
-                    breakLabel={'...'}
-                    breakClassName={'break-me'}
-                    pageCount={Math.ceil(values.length / dataPerPage)}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={5}
+                {/* ReactPaginate */}
+                <ReactPaginate
+                    previousLabel={'Previous'}
+                    nextLabel={'Next'}
+                    pageCount={Math.ceil(values.length / dataPerPage)} // Dynamically calculate pageCount
+                    marginPagesDisplayed={0}
+                    pageRangeDisplayed={0}
                     onPageChange={this.handlePageClick}
-                    containerClassName={'pagination'}
+                    containerClassName={'pagination justify-content-center'}
                     subContainerClassName={'pages pagination'}
                     activeClassName={'active'}
+                    previousClassName={'page-item'}
+                    nextClassName={'page-item'}
+                    previousLinkClassName={'page-link'}
+                    nextLinkClassName={'page-link'}
                 />
 
-                <p>The total number of features:{this.state.tableRows.length} and the total number of rows:{this.state.values.length}</p>
-                <br/>
-                <br/>
+                
+
+                <p className="mt-3">The total number of features: {tableRows.length} and the total number of rows: {values.length}</p>
 
                 {/* Data Description */}
                 <div>
@@ -292,16 +285,9 @@ export class ReadCSV extends Component{
                         </div>
                     ))}
                 </div>
-                <br/>
-                <br/>
-                {/* <DataDescription tableRows={tableRows} values={values}/> */}
 
-                
                 {/* Bar Chart */}
-                <BarChart missingValuesPercentage={missingValuesPercentage}/>
-                <br/>
-                <br/>
-
+                <BarChart missingValuesPercentage={missingValuesPercentage} />
 
                 {/* Histogram chart */}
                 <label>
@@ -310,62 +296,38 @@ export class ReadCSV extends Component{
                         type="number"
                         value={this.state.histogramFeatureIndex}
                         onChange={this.handleHistogramIndexChange}
+                        className="form-control"
                     />
                 </label>
 
-                <button onClick={this.handleShowHistogram}>Press to show Histogram</button>
-                
+                <button onClick={this.handleShowHistogram} className="btn btn-primary">Press to show Histogram</button>
+
                 {this.state.showHistogram && (
-                <HistogramChart
-                    featureData={this.state.values.map((row) => row[this.state.histogramFeatureIndex])}
-                    featureName={this.state.tableRows[this.state.histogramFeatureIndex]}
-                />
+                    <HistogramChart
+                        featureData={this.state.values.map((row) => row[this.state.histogramFeatureIndex])}
+                        featureName={this.state.tableRows[this.state.histogramFeatureIndex]}
+                    />
                 )}
 
-                <br/>
-                <br/>   
-
                 {/* Pie Chart */}
-                { this.state.categoricalFeatures && this.state.numericalStats && (
-                        <PieChart 
-                            categoricalFeatures= {this.state.categoricalFeatures}
-                            numericalFeatures = {this.state.numericalStats} 
-                        />
-                    )
-                }
-                <br/>
-                <br/>
+                {this.state.categoricalFeatures && this.state.numericalStats && (
+                    <PieChart
+                        categoricalFeatures={this.state.categoricalFeatures}
+                        numericalFeatures={this.state.numericalStats}
+                    />
+                )}
 
-               {/* Correlation Matrix */}
-               {/* <div>
-                    <h3>Correlation Matrix:</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                {tableRows.map((feature, index) => (
-                                    <th key={index}>{feature}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.state.correlationMatrix.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    {row.map((correlation, colIndex) => (
-                                        <td key={colIndex}>{correlation.toFixed(2)}</td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div> */}
+                {/* Correlation Matrix */}
+                <HeatMap numericalStats={this.state.numericalStats} correlationMatrix={this.state.correlationMatrix} />
 
-                <HeatMap numericalStats = {this.state.numericalStats}  correlationMatrix = {this.state.correlationMatrix} />
+                {/* Scatter Plot */}
+                {/* <ScatterPlot
+                    data={values.map(row => ({ x: values[0], y: values[1] }))} // Adjust this according to your data
+                    xLabel={tableRows[0]} // Adjust as needed
+                    yLabel={tableRows[1]} // Adjust as needed
+                /> */}
+            </div>
 
-                <br/>
-                <br/>
-
-
-            </>
             
         );
     }
