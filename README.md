@@ -26,9 +26,11 @@ The EDA-Board is a powerful tool designed to streamline and expedite the explora
 ## Figma Prototype:
 Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/EDA-Board?type=design&node-id=5%3A15&mode=design&t=YJzbAhmoD1EKn95o-1) to visualize the design and layout of the EDA-Board.
 
-## Website URL: [EDA-Board](https://eda-board.netlify.app/)
+## Website URL: 
+[EDA-Board](https://eda-board.netlify.app/)
 
-## Video Demonstration Link: [Tutorial]() 
+## Video Demonstration Link: 
+[Tutorial]() 
 
 ## How to Use:
 1. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
