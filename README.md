@@ -28,6 +28,8 @@ Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/
 
 ## Website URL: [EDA-Board](https://eda-board.netlify.app/)
 
+## Video Demonstration Link: [Tutorial]() 
+
 ## How to Use:
 1. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
 2. **Navigate Data**: After uploading the file, a table will be displayed, allowing users to navigate the dataset with a next button.
