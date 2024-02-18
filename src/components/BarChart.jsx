@@ -6,6 +6,8 @@ import Chart from 'chart.js/auto';
 
 import BarChartUtils from "../model/barUtils";
 
+import PropTypes from 'prop-types';
+
 export class BarChart extends Component {
   render() {
     const { missingValuesPercentage } = this.props;
@@ -23,6 +25,12 @@ export class BarChart extends Component {
       </>
     );
   }
+}
+
+BarChart.propTypes = {
+
+  missingValuesPercentage: PropTypes.Object
+
 }
 
 export default BarChart;

@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Pie } from "react-chartjs-2";
 import PieChartUtils from "../model/pieUtils";
 
+import PropTypes from 'prop-types';
+
 export class PieChart extends Component {
   render() {
     const { categoricalFeatures, numericalFeatures } = this.props;
@@ -18,6 +20,13 @@ export class PieChart extends Component {
       </>
     );
   }
+}
+
+PieChart.propTypes = {
+
+  categoricalFeatures: PropTypes.Object,
+  numericalFeatures: PropTypes.Object
+
 }
 
 export default PieChart;

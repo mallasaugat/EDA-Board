@@ -1,0 +1,7 @@
+#formFileSm {
+    position: absolute;
+    top: 20px;
+    background-color: rgb(147, 147, 233);
+    display: flex;
+    justify-content: center;
+}

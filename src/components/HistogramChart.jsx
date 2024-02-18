@@ -5,6 +5,8 @@ import Chart from 'chart.js/auto';
 
 import HistogramUtils from "../model/histogramUtils";
 
+import PropTypes from 'prop-types';
+
 export class HistogramChart extends Component {
   constructor(props) {
     super(props);
@@ -61,6 +63,13 @@ export class HistogramChart extends Component {
       </>
     );
   }
+}
+
+HistogramChart.propTypes = {
+
+  values: PropTypes.Object,
+  tableRows: PropTypes.Object
+
 }
 
 export default HistogramChart;
