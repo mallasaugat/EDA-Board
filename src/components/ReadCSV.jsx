@@ -195,70 +195,85 @@ export class ReadCSV extends Component{
         
         
         return(
-            <div className="container mt-5">
+
+
+            <div className="container mt-5" id="main">
+
+                <h1 id="title">EDA Board</h1>
+
+                {values.length > 0 || (<h4 id='info'>Upload dataset (csv format) and start the exploratory data analysis</h4>)}
+
                 {/* File Uploader */}
                 <input type="file" name="file" accept='.csv' className="form-control form-control-sm mb-3" id="formFileSm" onChange={this.changeHandler} />
 
-                {/* Table */}
-                <table className="table">
-                    <thead>
-                        <tr>
-                            {tableRows.map((rows, index) => (
-                                <th key={index}>{rows}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentValues.map((value, index) => (
-                            <tr key={index}>
-                                {value.map((val, i) => (
-                                    <td key={i}>{val}</td>
+
+                <div id='bd'>
+
+                    {/* Table */}
+                    <table className="table" id='table'>
+                        <thead>
+                            <tr>
+                                {tableRows.map((rows, index) => (
+                                    <th key={index}>{rows}</th>
                                 ))}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {currentValues.map((value, index) => (
+                                <tr key={index}>
+                                    {value.map((val, i) => (
+                                        <td key={i}>{val}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
 
-                {/* ReactPaginate */}
-                {values.length > 0 && (<ReactPaginate
-                    previousLabel={'Previous'}
-                    nextLabel={'Next'}
-                    pageCount={Math.ceil(values.length / dataPerPage)} // Dynamically calculate pageCount
-                    marginPagesDisplayed={0}
-                    pageRangeDisplayed={0}
-                    onPageChange={this.handlePageClick}
-                    containerClassName={'pagination justify-content-center'}
-                    subContainerClassName={'pages pagination'}
-                    activeClassName={'active'}
-                    previousClassName={'page-item'}
-                    nextClassName={'page-item'}
-                    previousLinkClassName={'page-link'}
-                    nextLinkClassName={'page-link'}
-                />)
-                }
+                    {/* ReactPaginate */}
+                    {values.length > 0 && (<ReactPaginate
+                        previousLabel={'Previous'}
+                        nextLabel={'Next'}
+                        pageCount={Math.ceil(values.length / dataPerPage)} // Dynamically calculate pageCount
+                        marginPagesDisplayed={0}
+                        pageRangeDisplayed={0}
+                        onPageChange={this.handlePageClick}
+                        containerClassName={'pagination justify-content-center'}
+                        subContainerClassName={'pages pagination'}
+                        activeClassName={'active'}
+                        previousClassName={'page-item'}
+                        nextClassName={'page-item'}
+                        previousLinkClassName={'page-link'}
+                        nextLinkClassName={'page-link'}
+                        id='paginate'
+                    />)
+                    }
+
+                    
+
+                    {values.length > 0 && (<p className="mt-3">The total number of features: {tableRows.length} and the total number of rows: {values.length}</p>)}
+
+                    {/* Drop Down */}
+                    {values.length > 0 && (
+                        <Dropdown onSelect={this.handleDropdownChange}>
+                            <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                Select Visualization
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item eventKey="Data">Data Description</Dropdown.Item>
+                                <Dropdown.Item eventKey="Pie">Pie Chart</Dropdown.Item>
+                                <Dropdown.Item eventKey="Bar">Count Plot</Dropdown.Item>
+                                <Dropdown.Item eventKey="Histogram">Histogram</Dropdown.Item>
+                                <Dropdown.Item eventKey="Heat">Correlation HeatMap</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    )}
+                    <br/>
+                    <br/>
+                    {this.renderVisualization()}
+
+                </div>
 
                 
-
-                {values.length > 0 && (<p className="mt-3">The total number of features: {tableRows.length} and the total number of rows: {values.length}</p>)}
-
-                {/* Drop Down */}
-                {values.length > 0 && (
-                    <Dropdown onSelect={this.handleDropdownChange}>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                            Select Visualization
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item eventKey="Data">Data Description</Dropdown.Item>
-                            <Dropdown.Item eventKey="Pie">Pie Chart</Dropdown.Item>
-                            <Dropdown.Item eventKey="Bar">Count Plot</Dropdown.Item>
-                            <Dropdown.Item eventKey="Histogram">Histogram</Dropdown.Item>
-                            <Dropdown.Item eventKey="Heat">Correlation HeatMap</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                )}
-                <br/>
-                <br/>
-                {this.renderVisualization()}
 
                 
             </div>
