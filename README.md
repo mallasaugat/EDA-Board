@@ -30,10 +30,8 @@ Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/
 [EDA-Board](https://eda-board.netlify.app/)
 
 ## Video Demonstration Link: 
-[Tutorial]() 
+[Demo](https://drive.google.com/file/d/1aQgCEHUUE6otv491DRTnpzMEBUUq4rKc/view?usp=sharing) 
 
-## Code Explanation Video Link:
-[Code Review]()
 
 ## How to Use:
 1. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
