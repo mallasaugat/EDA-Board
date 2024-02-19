@@ -32,6 +32,9 @@ Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/
 ## Video Demonstration Link: 
 [Demo](https://drive.google.com/file/d/1aQgCEHUUE6otv491DRTnpzMEBUUq4rKc/view?usp=sharing) 
 
+## Run locally:
+- npm install
+- npm run dev
 
 ## How to Use:
 1. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
