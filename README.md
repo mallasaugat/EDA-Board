@@ -1,4 +1,4 @@
-# EDA-Board (React Hooks)
+# EDA-Board
 
 The EDA-Board is a tool designed to streamline and expedite the exploratory data analysis (EDA) process, reducing the time required for data exploration tasks. It offers a basic online platform with key functionalities aimed at providing users with insights into their datasets.
 
