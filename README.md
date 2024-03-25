@@ -37,9 +37,10 @@ Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/
 - npm run dev
 
 ## How to Use:
-1. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
-2. **Navigate Data**: After uploading the file, a table will be displayed, allowing users to navigate the dataset with a next button.
-3. **Select Visualization**: Once the dataset is uploaded, a select visualization dropdown will be available.
-4. **Explore Visualizations**: Users can select any visualization from the dropdown menu to gain insights into the dataset.
+1. **Sign UP / Log in**: Sign up/Log In with your email and password
+2. **Upload Data**: Initially, only a button to upload data (CSV file) will be visible.
+3. **Navigate Data**: After uploading the file, a table will be displayed, allowing users to navigate the dataset with a next button.
+4. **Select Visualization**: Once the dataset is uploaded, a select visualization dropdown will be available.
+5. **Explore Visualizations**: Users can select any visualization from the dropdown menu to gain insights into the dataset.
 
 Explore your data efficiently and effectively with the EDA-Board!
