@@ -4,23 +4,21 @@ import PieChartUtils from "../model/pieUtils";
 
 import PropTypes from 'prop-types';
 
-export class PieChart extends Component {
-  render() {
-    const { categoricalFeatures, numericalFeatures } = this.props;
+function PieChart({ categoricalFeatures, numericalFeatures }){
 
-    // Prepare data for the pie chart
-    const pieChartData = PieChartUtils.preparePieChartData(categoricalFeatures, numericalFeatures);
+  // Prepare data for the pie chart
+  const pieChartData = PieChartUtils(categoricalFeatures, numericalFeatures);
 
-    return (
-      <>
-        <div style={{ width: '50%', margin: 'auto' }}>
-          <h2>Number of Categorical and Numerical Features</h2>
-          <Pie data={pieChartData} />
-        </div>
-      </>
-    );
-  }
+  return (
+    <>
+      <div style={{ width: '50%', margin: 'auto' }}>
+        <h2>Number of Categorical and Numerical Features</h2>
+        <Pie data={pieChartData} />
+      </div>
+    </>
+  );
 }
+
 
 PieChart.propTypes = {
 

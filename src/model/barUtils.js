@@ -1,5 +1,5 @@
-class BarChartUtils {
-    static prepareBarChartData(missingValuesPercentage) {
+function BarChartUtils(missingValuesPercentage){
+   
       const chartData = {
         labels: Object.keys(missingValuesPercentage || {}),
         datasets: [
@@ -14,9 +14,7 @@ class BarChartUtils {
           },
         ],
       };
-  
       return chartData;
-    }
-  }
-  
-  export default BarChartUtils;
+}
+
+export default BarChartUtils;
