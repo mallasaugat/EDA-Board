@@ -30,7 +30,7 @@ Explore the [Figma Prototype](https://www.figma.com/file/tIFJYLlh2gmCJEQnfqkYNm/
 [EDA-Board](https://eda-b.netlify.app/)
 
 ## Video Demonstration Link: 
-[Demo](https://drive.google.com/file/d/1aQgCEHUUE6otv491DRTnpzMEBUUq4rKc/view?usp=sharing) 
+[Demo](https://drive.google.com/file/d/1ljbRkLcPxy0jxeHek1nIOLUmFwdozyoj/view?usp=sharing) 
 
 ## Run locally:
 - npm install
